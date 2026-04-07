@@ -15,6 +15,39 @@ The system also supports **attendance tracking,
 
 ---
 
+## 📁 Project Structure
+```
+SSMS/
+│
+├── CameraWebServer/ # ESP32-CAM web server files
+│ ├── .skip.esp32c3
+│ ├── app_httpd.cpp
+│ ├── camera_index.h
+│ ├── camera_pins.h
+│ └── CameraWebServer.ino
+│
+├── SSMv2/ # Main Ardiuno seat monitoring code
+│ └── SSMv2.ino
+│
+├── templates/ # Frontend dashboard 
+│ └── dashboard.html
+│
+├── server.py # Flask backend server
+├── requirements.txt # Python dependencies
+```
+
+---
+
+## 🧩 Description
+
+- **CameraWebServer/** → Handles ESP32-CAM streaming functionality  
+- **SSMv2/** → Core seat monitoring logic (sensor handling)  
+- **templates/** → Web dashboard UI  
+- **server.py** → Backend server (Flask + Serial communication)  
+- **requirements.txt** → Required Python libraries  
+
+---
+
 # ✅ Smart Seat Monitoring – Setup & Usage Guide
 
 ## 🔌 Step 1: Connect Hardware
