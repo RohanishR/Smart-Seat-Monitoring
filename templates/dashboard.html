@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Health Intelligence Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<script id="tailwind-config">
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                "colors": {
+                    "primary-fixed": "#d6e3ff",
+                    "inverse-surface": "#2e3132",
+                    "secondary": "#405f91",
+                    "tertiary-container": "#c25300",
+                    "surface-container-low": "#f3f4f5",
+                    "surface-container": "#edeeef",
+                    "secondary-container": "#a6c4fd",
+                    "surface": "#f8f9fa",
+                    "surface-container-highest": "#e1e3e4",
+                    "on-background": "#191c1d",
+                    "surface-tint": "#005db8",
+                    "inverse-primary": "#aac7ff",
+                    "primary": "#005ab3",
+                    "error-container": "#ffdad6",
+                    "on-error": "#ffffff",
+                    "on-surface": "#191c1d",
+                    "error": "#ba1a1a",
+                    "success": "#059669",
+                    "on-surface-variant": "#414754",
+                    "outline": "#717786"
+                },
+                "fontFamily": {
+                    "headline": ["Space Grotesk"],
+                    "body": ["Space Grotesk"],
+                    "label": ["Space Grotesk"]
+                }
+            },
+        },
+    }
+</script>
+<style>
+    body { font-family: 'Space Grotesk', sans-serif; }
+    .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .pulse-ring {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: .5; transform: scale(1.1); }
+    }
+    
+    /* Animation SVGs Logic Styles */
+    #personFig {
+        transition: opacity 0.5s ease-in-out;
+    }
+    #upperBody {
+        transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        --fig-color: #005ab3; /* Default Tailwind Primary */
+    }
+    #upperBody circle, #upperBody line, #upperBody path {
+        transition: stroke 0.4s, fill 0.4s;
+    }
+</style>
+</head>
+<body class="bg-surface text-on-surface antialiased overflow-x-hidden">
+
+<div id="toast" class="fixed top-24 right-8 bg-error/10 backdrop-blur-md border border-error/30 text-error px-6 py-4 rounded-xl font-bold shadow-lg transform -translate-y-24 opacity-0 transition-all duration-500 z-50 flex items-center gap-3">
+    <span class="material-symbols-outlined">warning</span>
+    Bad Posture Detected
+</div>
+
+<nav class="fixed top-0 w-full z-40 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md shadow-sm shadow-slate-200/50 flex justify-between items-center h-16 px-8">
+    <div class="flex items-center gap-8">
+        <span class="text-xl font-bold tracking-tighter text-slate-900 font-['Space_Grotesk']">Health Intelligence</span>
+        <div class="hidden md:flex items-center space-x-6">
+            <a class="text-primary font-bold border-b-2 border-primary py-5" href="#">Live Monitoring</a>
+        </div>
+    </div>
+    <div class="flex items-center space-x-4">
+        <span id="seat-status-badge" class="px-3 py-1 bg-surface-container text-xs font-bold rounded-full uppercase tracking-widest text-on-surface-variant">Seat: --</span>
+    </div>
+</nav>
+
+<aside class="h-screen w-64 fixed left-0 top-0 z-30 bg-slate-50 flex flex-col p-4 pt-24 space-y-2 text-sm font-medium border-r border-outline-variant/20 shadow-sm">
+    <div class="mb-8 px-2">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-sm">
+                <span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">health_and_safety</span>
+            </div>
+            <div>
+                <h1 class="text-md font-black tracking-tighter text-primary">Health Intel</h1>
+                <p class="text-[10px] uppercase tracking-widest text-slate-400 font-bold">Clinical Curator</p>
+            </div>
+        </div>
+    </div>
+    <nav class="flex-1 space-y-2">
+        <a class="flex items-center gap-3 px-3 py-2.5 bg-white text-primary rounded-lg shadow-sm font-semibold transition-all" href="#">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span>Dashboard</span>
+        </a>
+        <div>
+            <div class="flex items-center gap-3 px-3 py-2.5 text-slate-500 rounded-lg font-semibold">
+                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">calendar_today</span>
+                <span>Attendance</span>
+            </div>
+            <!-- Face Recognition Attendance Log -->
+            <div class="mx-2 mt-1 mb-2">
+                <div class="flex justify-between items-center mb-2 px-1">
+                    <span class="text-[9px] font-bold text-primary uppercase tracking-widest">Face Recognition</span>
+                    <div class="flex gap-1 items-center">
+                        <span class="w-1.5 h-1.5 rounded-full bg-success pulse-ring"></span>
+                        <span class="text-[8px] font-bold text-primary uppercase tracking-widest">Live</span>
+                    </div>
+                </div>
+                <div class="bg-slate-100 rounded-lg p-2 h-48 overflow-y-auto border border-outline-variant/10">
+                    <ul id="attendance-list" class="space-y-1.5">
+                        <li class="text-xs text-on-surface-variant text-center mt-8">Waiting for camera data...</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="mt-auto pb-4">
+        <button class="w-full py-2.5 bg-primary/10 text-primary rounded-lg font-bold text-sm hover:bg-primary/20 transition-colors">
+            Export Reports
+        </button>
+    </div>
+</aside>
+
+<main class="ml-64 pt-24 pb-12 px-8 min-h-screen">
+    <header class="mb-10 max-w-5xl">
+        <h1 class="text-5xl font-bold tracking-tight text-on-surface mb-2">Morning Overview</h1>
+        <p class="text-on-surface-variant max-w-xl">Real-time health telemetry and biometric synthesis. Connecting to Smart Seat sensors...</p>
+    </header>
+
+    <div class="grid grid-cols-12 gap-6 max-w-7xl">
+        
+        <div class="col-span-12 lg:col-span-4 grid grid-cols-1 gap-6">
+            
+            <div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/15 hover:shadow-sm transition-all group h-[160px] flex flex-col justify-center">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="bg-error-container/20 p-2 rounded-lg">
+                        <span class="material-symbols-outlined text-error" style="font-variation-settings: 'FILL' 1;">favorite</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <div class="w-2 h-2 rounded-full bg-error pulse-ring"></div>
+                        <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Live</span>
+                    </div>
+                </div>
+                <p class="text-sm font-medium text-on-surface-variant">Real-time Pulse</p>
+                <div class="flex items-baseline gap-1 mt-1">
+                    <span id="hr-val" class="text-4xl font-bold tracking-tighter text-on-surface">--</span>
+                    <span id="hr-unit" class="text-lg font-medium text-on-surface-variant">BPM</span>
+                </div>
+            </div>
+
+            <div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/15 hover:shadow-sm transition-all h-[160px] flex flex-col justify-center">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="bg-secondary-container/20 p-2 rounded-lg">
+                        <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">air</span>
+                    </div>
+                </div>
+                <p class="text-sm font-medium text-on-surface-variant">Oxygen Level (SpO2)</p>
+                <div class="flex items-baseline gap-1 mt-1">
+                    <span id="spo2-val" class="text-4xl font-bold tracking-tighter text-on-surface">--</span>
+                    <span id="spo2-unit" class="text-lg font-medium text-on-surface-variant">%</span>
+                </div>
+            </div>
+
+            <div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/15 hover:shadow-sm transition-all h-[160px] flex flex-col justify-center">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="bg-tertiary-container/10 p-2 rounded-lg">
+                        <span class="material-symbols-outlined text-tertiary-container" style="font-variation-settings: 'FILL' 1;">thermostat</span>
+                    </div>
+                </div>
+                <p class="text-sm font-medium text-on-surface-variant">Body Temp</p>
+                <div class="flex items-baseline gap-1 mt-1">
+                    <span id="temp-val" class="text-4xl font-bold tracking-tighter text-on-surface">--</span>
+                    <span class="text-lg font-medium text-on-surface-variant">°C</span>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-span-12 lg:col-span-8">
+            <div class="bg-surface-container-lowest p-8 rounded-xl border border-outline-variant/15 h-full relative overflow-hidden flex flex-col">
+                <div class="flex justify-between items-start mb-8 relative z-10">
+                    <div>
+                        <span class="text-[10px] font-bold text-primary uppercase tracking-widest block mb-1">Postural Biomechanics</span>
+                        <h3 class="text-2xl font-bold tracking-tight">Live Posture View</h3>
+                    </div>
+                    <div class="flex gap-2">
+                        <span class="px-3 py-1 bg-primary-fixed text-primary text-[10px] font-bold rounded-full uppercase tracking-widest">Kinematic View</span>
+                    </div>
+                </div>
+
+                <div class="flex-grow flex items-center justify-center relative bg-surface-container-low/30 rounded-xl border border-outline-variant/10 p-4">
+                    
+                    <div class="relative w-full max-w-md aspect-video flex items-center justify-center">
+                        
+                        <svg viewBox="0 0 200 220" class="w-full h-full max-h-64 text-on-surface">
+                            <path d="M 60 140 L 140 140 M 70 140 L 70 60 M 90 140 L 90 200 M 120 140 L 120 200" stroke="currentColor" stroke-opacity="0.15" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                            
+                            <g id="personFig" style="opacity: 0;">
+                                <path d="M 90 130 L 135 130 L 135 180" stroke="currentColor" stroke-opacity="0.4" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                                
+                                <g id="upperBody" style="transform-origin: 90px 130px;">
+                                    <line x1="90" y1="130" x2="90" y2="70" stroke="var(--fig-color)" stroke-width="14" stroke-linecap="round" />
+                                    <circle cx="90" cy="45" r="16" fill="var(--fig-color)" />
+                                    <path d="M 90 75 L 110 105 L 140 100" stroke="var(--fig-color)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                                </g>
+                            </g>
+                        </svg>
+
+                        <div class="absolute top-0 right-0 p-3 bg-white/80 backdrop-blur-sm rounded-lg border border-outline-variant/10 shadow-sm">
+                            <p id="pitchAngleText" class="text-xl font-black text-primary tracking-tight">--°</p>
+                        </div>
+
+                        <div class="absolute bottom-0 right-0 p-4 bg-white/80 backdrop-blur-sm rounded-lg border border-outline-variant/10 shadow-sm">
+                            <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Spinal Alignment</p>
+                            <p id="posture-val" class="text-lg font-bold text-primary tracking-tight">--</p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="mt-8 grid grid-cols-2 gap-4">
+                    <div class="bg-surface-container-low p-4 rounded-lg flex items-center justify-between">
+                        <div>
+                            <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Total Sitting Time</p>
+                            <p id="sitting-time-val" class="text-xl font-bold tracking-tight">00:00:00</p>
+                        </div>
+                        <span class="material-symbols-outlined text-outline">schedule</span>
+                    </div>
+                    <div class="bg-surface-container-low p-4 rounded-lg">
+                        <p class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Posture Heat</p>
+                        <div class="w-full h-2 mt-3 bg-outline-variant/30 rounded-full overflow-hidden">
+                            <div id="heatFill" class="h-full w-0 bg-gradient-to-r from-success via-yellow-400 to-error transition-all duration-500 rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-span-12">
+            <div class="bg-surface-container-lowest p-8 rounded-xl border border-outline-variant/15 hover:shadow-sm transition-all">
+                <div class="flex justify-between items-start mb-6 relative z-10">
+                    <div>
+                        <span class="text-[10px] font-bold text-primary uppercase tracking-widest block mb-1">Live Telemetry</span>
+                        <h3 class="text-2xl font-bold tracking-tight">Biometric Trends</h3>
+                    </div>
+                </div>
+                <div class="relative w-full h-[300px]">
+                    <canvas id="vitalsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+// ==========================================
+// 1. CHART.JS INITIALIZATION
+// ==========================================
+const ctx = document.getElementById('vitalsChart').getContext('2d');
+
+// Tailwind Colors
+const COLOR_PRIMARY = '#005ab3';
+const COLOR_SUCCESS = '#059669'; 
+const COLOR_ERROR = '#ba1a1a';
+const COLOR_TEXT = '#414754';
+const COLOR_GRID = 'rgba(113, 119, 134, 0.1)';
+
+let hrGradient = ctx.createLinearGradient(0, 0, 0, 300);
+hrGradient.addColorStop(0, 'rgba(186, 26, 26, 0.2)'); // Error color faded
+hrGradient.addColorStop(1, 'rgba(186, 26, 26, 0.0)');
+
+let spo2Gradient = ctx.createLinearGradient(0, 0, 0, 300);
+spo2Gradient.addColorStop(0, 'rgba(5, 150, 105, 0.2)'); // Success color faded
+spo2Gradient.addColorStop(1, 'rgba(5, 150, 105, 0.0)');
+
+const MAX_DATA_POINTS = 30; 
+
+const vitalsChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: Array(MAX_DATA_POINTS).fill(''), 
+        datasets: [
+            {
+                label: 'Heart Rate (BPM)',
+                borderColor: COLOR_ERROR,
+                backgroundColor: hrGradient,
+                borderWidth: 2,
+                pointRadius: 0,
+                fill: true,
+                tension: 0.4,
+                data: Array(MAX_DATA_POINTS).fill(null),
+                yAxisID: 'y'
+            },
+            {
+                label: 'SpO2 (%)',
+                borderColor: COLOR_SUCCESS,
+                backgroundColor: spo2Gradient,
+                borderWidth: 2,
+                pointRadius: 0,
+                fill: true,
+                tension: 0.4,
+                data: Array(MAX_DATA_POINTS).fill(null),
+                yAxisID: 'y1'
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false, 
+        animation: false, 
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+            legend: { labels: { color: COLOR_TEXT, font: {family: 'Space Grotesk'} } },
+            tooltip: { enabled: false }
+        },
+        scales: {
+            x: { display: false },
+            y: {
+                type: 'linear', display: true, position: 'left',
+                title: { display: true, text: 'BPM', color: COLOR_TEXT },
+                grid: { color: COLOR_GRID },
+                ticks: { color: COLOR_TEXT },
+                suggestedMin: 40, suggestedMax: 130
+            },
+            y1: {
+                type: 'linear', display: true, position: 'right',
+                title: { display: true, text: 'SpO2 %', color: COLOR_TEXT },
+                grid: { drawOnChartArea: false }, 
+                ticks: { color: COLOR_TEXT },
+                min: 80, max: 100
+            }
+        }
+    }
+});
+
+// ==========================================
+// 2. SEATING ANIMATION & DATA LOGIC
+// ==========================================
+let sittingSeconds = 0;
+let isSitting = false;
+let badPosture = false;
+
+function showToast() {
+    const toast = document.getElementById("toast");
+    toast.classList.remove("-translate-y-24", "opacity-0");
+    toast.classList.add("translate-y-0", "opacity-100");
+    
+    setTimeout(() => {
+        toast.classList.add("-translate-y-24", "opacity-0");
+        toast.classList.remove("translate-y-0", "opacity-100");
+    }, 4000);
+}
+
+function formatTime(sec) {
+    let h = Math.floor(sec / 3600);
+    let m = Math.floor((sec % 3600) / 60);
+    let s = sec % 60;
+    return String(h).padStart(2, '0') + ":" + String(m).padStart(2, '0') + ":" + String(s).padStart(2, '0');
+}
+
+function update() {
+    fetch("/data")
+    .then(res => res.json())
+    .then(d => {
+        // --- Basic Fields ---
+        document.getElementById("seat-status-badge").innerText = "Seat: " + d.seat;
+        document.getElementById("temp-val").innerText = d.temp > 0 ? d.temp : "--";
+        
+        // --- NEW: Dynamic HR / SpO2 "Reading..." Logic ---
+        let hrVal = document.getElementById("hr-val");
+        let hrUnit = document.getElementById("hr-unit");
+        let spo2Val = document.getElementById("spo2-val");
+        let spo2Unit = document.getElementById("spo2-unit");
+
+        if (d.hr > 0) {
+            hrVal.innerText = d.hr;
+            hrVal.className = "text-4xl font-bold tracking-tighter text-on-surface";
+            hrUnit.style.display = "inline";
+        } else {
+            hrVal.innerText = "Reading...";
+            hrVal.className = "text-xl font-medium text-on-surface-variant animate-pulse";
+            hrUnit.style.display = "none";
+        }
+
+        if (d.spo2 > 0) {
+            spo2Val.innerText = d.spo2;
+            spo2Val.className = "text-4xl font-bold tracking-tighter text-on-surface";
+            spo2Unit.style.display = "inline";
+        } else {
+            spo2Val.innerText = "Reading...";
+            spo2Val.className = "text-xl font-medium text-on-surface-variant animate-pulse";
+            spo2Unit.style.display = "none";
+        }
+
+        // --- NEW: Update Chart Data ---
+        let plotHR = d.hr > 0 ? d.hr : null; // null breaks the line to indicate "Reading..."
+        let plotSpO2 = d.spo2 > 0 ? d.spo2 : null;
+
+        vitalsChart.data.datasets[0].data.push(plotHR);
+        vitalsChart.data.datasets[0].data.shift();
+        
+        vitalsChart.data.datasets[1].data.push(plotSpO2);
+        vitalsChart.data.datasets[1].data.shift();
+        
+        vitalsChart.update();
+
+
+        // --- Posture & Animation Logic ---
+        let postureText = document.getElementById("posture-val");
+        let personFig = document.getElementById("personFig");
+        let upperBody = document.getElementById("upperBody");
+        let angleText = document.getElementById("pitchAngleText");
+        
+        postureText.innerText = d.posture;
+
+        let heat = Math.min(Math.abs(d.pitch) * 2, 100);
+        document.getElementById("heatFill").style.width = heat + "%";
+
+        // Seat Detection Logic
+        if (d.seat === "Present") {
+            isSitting = true;
+            personFig.style.opacity = "1";
+
+            if (d.posture === "Bad" || d.posture === "Leaning Back") {
+                postureText.className = "text-lg font-bold text-error tracking-tight";
+                angleText.className = "text-xl font-black text-error tracking-tight";
+                upperBody.style.setProperty('--fig-color', COLOR_ERROR);
+
+                if (!badPosture) {
+                    showToast();
+                    badPosture = true;
+                }
+            } else {
+                postureText.className = "text-lg font-bold text-success tracking-tight";
+                angleText.className = "text-xl font-black text-success tracking-tight";
+                upperBody.style.setProperty('--fig-color', COLOR_SUCCESS);
+                badPosture = false;
+            }
+
+            let clampedPitch = Math.max(-60, Math.min(60, d.pitch));
+            upperBody.style.transform = `rotate(${clampedPitch}deg)`;
+            angleText.innerText = Math.round(d.pitch) + "°";
+
+        } else {
+            isSitting = false;
+            sittingSeconds = 0;
+            badPosture = false;
+
+            personFig.style.opacity = "0"; 
+            postureText.className = "text-lg font-bold text-on-surface-variant tracking-tight";
+            angleText.innerText = "--°";
+            angleText.className = "text-xl font-black text-primary tracking-tight";
+            upperBody.style.setProperty('--fig-color', COLOR_PRIMARY);
+        }
+    })
+    .catch(() => console.log("Waiting for sensor data..."));
+}
+
+// Sitting Time Counter
+setInterval(() => {
+    if (isSitting) {
+        sittingSeconds++;
+        document.getElementById("sitting-time-val").innerText = formatTime(sittingSeconds);
+    } else {
+        document.getElementById("sitting-time-val").innerText = "00:00:00";
+    }
+}, 1000);
+
+// Fetch loop
+setInterval(update, 1000);
+
+// ==========================================
+// 3. ESP32-CAM ATTENDANCE FETCH LOGIC
+// ==========================================
+// *** IMPORTANT: Change this IP to match your ESP32's current IP ***
+const ESP32_IP = "http://10.109.160.207"; 
+
+function fetchAttendance() {
+    fetch(`${ESP32_IP}/attendance`)
+    .then(response => response.json())
+    .then(data => {
+        const listContainer = document.getElementById('attendance-list');
+        
+        if (data.length === 0) {
+            listContainer.innerHTML = '<li class="text-sm text-on-surface-variant text-center mt-10">No faces recognized yet.</li>';
+            return;
+        }
+
+        // Clear existing list
+        listContainer.innerHTML = '';
+
+        // Populate with new data
+        data.forEach(person => {
+            const li = document.createElement('li');
+            li.className = "flex items-center justify-between p-3 bg-white rounded-lg border border-outline-variant/10 shadow-sm";
+            li.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <div class="bg-primary-fixed text-primary w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs">
+                        ${person.id}
+                    </div>
+                    <span class="font-semibold text-on-surface">${person.name}</span>
+                </div>
+                <span class="text-[10px] font-bold text-success uppercase tracking-widest bg-success/10 px-2 py-1 rounded-full">Present</span>
+            `;
+            listContainer.appendChild(li);
+        });
+    })
+    .catch(error => {
+        console.error("Error fetching attendance:", error);
+    });
+}
+
+</script>
+</body>
+</html>
