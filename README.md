@@ -7,7 +7,7 @@ An IoT-enabled intelligent seating system that integrates posture, pressure, phy
 ## 🚀 Features
 
 - 📡 Real-time seat occupancy monitoring  
-- 🔌 ESP32 + sensor integration (pressure/IR/etc.)  
+- 🔌 ESP32 + sensor integration  
 - 🌐 Live dashboard (Flask + HTML/CSS/JS)  
 - 🧾 Attendance tracking system 
 - 📊 Data visualization (charts & logs)  
