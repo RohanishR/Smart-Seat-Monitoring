@@ -1,7 +1,6 @@
 # 🪑 Smart Seat Monitoring System
 
-An IoT + Web-based system that monitors seat occupancy in real-time using **ESP32 sensors**, a **Flask backend**, and an interactive **web dashboard**.  
-The system also supports **attendance tracking, 
+An IoT-enabled intelligent seating system that integrates posture, pressure, physiological, and vision-based sensors. It continuously monitors student posture, health, engagement, and stress in real time. Unlike traditional classrooms or single-technology solutions, it uses multi-sensor fusion to provide accurate, non-intrusive monitoring. The system enhances concentration, improves posture habits, detects fatigue or health issues early, and alerts teachers to abnormal patterns—creating a smarter, healthier learning environment.  
 
 ---
 
